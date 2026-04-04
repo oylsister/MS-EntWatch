@@ -2,7 +2,6 @@
 using MS_EntWatch.Items;
 using MS_EntWatch.Modules;
 using MS_EntWatch.Modules.Eban;
-using Sharp.Shared.Enums;
 using Sharp.Shared.Objects;
 using Sharp.Shared.Types;
 using static MS_EntWatch.Modules.Eban.EbanDB;
@@ -11,34 +10,80 @@ namespace MS_EntWatch
 {
     public partial class EntWatch
     {
-        void RegAdminCommands()
+        private const string PermissionReload = "entwatch:reload";
+        private const string PermissionBan = "entwatch:ban";
+        private const string PermissionUnban = "entwatch:unban";
+        private const string PermissionTransfer = "entwatch:transfer";
+        private const string PermissionSpawn = "entwatch:spawn";
+        private const string PermissionBanPerm = "entwatch:banperm";
+        private const string PermissionBanLong = "entwatch:banlong";
+        private const string PermissionUnbanPerm = "entwatch:unbanperm";
+        private const string PermissionUnbanOther = "entwatch:unbanother";
+        public const string PermissionChat = "entwatch:chat";
+        public const string PermissionHUD = "entwatch:hud";
+
+        private void AdminCommands_InitializePermissions()
         {
-            AdminCmdsManager.InstallCommandCallback("ereload", "ew_reload", OnEWReload);
-            AdminCmdsManager.InstallCommandCallback("eshowitems", "ew_reload", OnEWShow);
-            AdminCmdsManager.InstallCommandCallback("eshowscheme", "ew_reload", OnEWScheme);
-            AdminCmdsManager.InstallCommandCallback("eban", "ew_ban", OnEWBan);
-            AdminCmdsManager.InstallCommandCallback("eunban", "ew_unban", OnEWUnBan);
-            AdminCmdsManager.InstallCommandCallback("ebanlist", "ew_ban", OnEWBanList);
-            AdminCmdsManager.InstallCommandCallback("elist", "ew_ban", OnEWList);
-            AdminCmdsManager.InstallCommandCallback("etransfer", "ew_transfer", OnEWTransfer);
-            AdminCmdsManager.InstallCommandCallback("espawn", "ew_spawn", OnEWSpawn);
+            if (_adminManager?.Instance is not { } adminManager || _AMInit) return;
+
+            try
+            {
+                var registry = adminManager.GetCommandRegistry(DisplayName);
+
+                registry.RegisterPermissions([PermissionReload, PermissionBan, PermissionUnban, PermissionTransfer, PermissionSpawn, PermissionBanPerm, PermissionBanLong, PermissionUnbanPerm, PermissionUnbanOther, PermissionChat, PermissionHUD]);
+                registry.RegisterAdminCommand("ereload", OnEWReload, [PermissionReload]);
+                registry.RegisterAdminCommand("eshowitems", OnEWShow, [PermissionReload]);
+                registry.RegisterAdminCommand("eshowscheme", OnEWScheme, [PermissionReload]);
+                registry.RegisterAdminCommand("eban", OnEWBan, [PermissionBan]);
+                registry.RegisterAdminCommand("eunban", OnEWUnBan, [PermissionUnban]);
+                registry.RegisterAdminCommand("ebanlist", OnEWBanList, [PermissionBan]);
+                registry.RegisterAdminCommand("elist", OnEWList, [PermissionBan]);
+                registry.RegisterAdminCommand("etransfer", OnEWTransfer, [PermissionTransfer]);
+                registry.RegisterAdminCommand("espawn", OnEWSpawn, [PermissionSpawn]);
+
+                _AMInit = true;
+            }
+            catch (InvalidOperationException) { }
+            catch (Exception e)
+            {
+                UI.EWSysInfo("EntWatch.Info.Error", 15, "Failed to initialize admin permissions.");
+                UI.EWSysInfo("EntWatch.Info.Error", 15, $"{e.Message}");
+            }
         }
 
-        private ECommandAction OnEWReload(IGameClient client, StringCommand command)
+        private static Sharp.Modules.AdminManager.Shared.IAdmin? AdminCommands_GetAdmin(IGameClient client)
         {
-            if (!client.IsValid) return ECommandAction.Stopped;
+            if (_adminManager?.Instance is not { } adminManager || !_AMInit) return null;
+            return adminManager.GetAdmin(client.SteamId);
+        }
+
+        public static bool AdminCommands_CheckPermission(IGameClient client, string permission)
+        {
+            if (AdminCommands_GetAdmin(client) is not { } admin) return false;
+            
+            return admin.HasPermission(permission);
+        }
+
+        public static byte AdminCommands_GetPlayerImmunity(IGameClient client)
+        {
+            if (AdminCommands_GetAdmin(client) is not { } admin) return 0;
+
+            return admin.Immunity;
+        }
+
+        private void OnEWReload(IGameClient? client, StringCommand command)
+        {
+            if (client == null || !client.IsValid) return;
 
             EW.CleanData();
             EW.LoadScheme();
             EW.LoadConfig();
             UI.ReplyToCommand(client, "EntWatch.Reply.Reload_configs", command.ChatTrigger, EW.g_Scheme != null ? EW.g_Scheme.Color_warning : "");
-
-            return ECommandAction.Stopped;
         }
 
-        private ECommandAction OnEWShow(IGameClient client, StringCommand command)
+        private void OnEWShow(IGameClient? client, StringCommand command)
         {
-            if (!client.IsValid || !EW.g_CfgLoaded || EW.g_Scheme == null) return ECommandAction.Stopped;
+            if (client == null || !client.IsValid || !EW.g_CfgLoaded || EW.g_Scheme == null) return;
 
             foreach (Item ItemTest in EW.g_ItemList.ToList())
             {
@@ -57,13 +102,11 @@ namespace MS_EntWatch
                 }
                 UI.ReplyToCommand(client, "EntWatch.Reply.NullString", command.ChatTrigger);
             }
-
-            return ECommandAction.Stopped;
         }
 
-        private ECommandAction OnEWScheme(IGameClient client, StringCommand command)
+        private void OnEWScheme(IGameClient? client, StringCommand command)
         {
-            if (!client.IsValid || EW.g_Scheme == null) return ECommandAction.Stopped;
+            if (client == null || !client.IsValid || EW.g_Scheme == null) return;
 
             UI.ReplyToCommand(client, "EntWatch.Reply.ShowScheme", command.ChatTrigger, EW.g_Scheme.Color_warning, "Color_tag", EW.g_Scheme.Color_tag, UI.ReplaceSpecial(EW.g_Scheme.Color_tag));
             UI.ReplyToCommand(client, "EntWatch.Reply.ShowScheme", command.ChatTrigger, EW.g_Scheme.Color_warning, "Color_name", EW.g_Scheme.Color_name, UI.ReplaceSpecial(EW.g_Scheme.Color_name));
@@ -77,20 +120,18 @@ namespace MS_EntWatch
             UI.ReplyToCommand(client, "EntWatch.Reply.ShowScheme", command.ChatTrigger, EW.g_Scheme.Color_warning, "Color_enabled", EW.g_Scheme.Color_enabled, UI.ReplaceSpecial(EW.g_Scheme.Color_enabled));
             UI.ReplyToCommand(client, "EntWatch.Reply.ShowScheme", command.ChatTrigger, EW.g_Scheme.Color_warning, "Color_disabled", EW.g_Scheme.Color_disabled, UI.ReplaceSpecial(EW.g_Scheme.Color_disabled));
             UI.ReplyToCommand(client, "EntWatch.Reply.ShowScheme", command.ChatTrigger, EW.g_Scheme.Color_warning, "Server_name", EW.g_Scheme.Color_tag, UI.ReplaceSpecial(EW.g_Scheme.Server_name));
-
-            return ECommandAction.Stopped;
         }
 
-        private ECommandAction OnEWBan(IGameClient client, StringCommand command)
+        private void OnEWBan(IGameClient? client, StringCommand command)
         {
-            if (!client.IsValid || EW.g_Scheme == null) return ECommandAction.Stopped;
+            if (client == null || !client.IsValid || EW.g_Scheme == null) return;
 
             int iArgNeed = 1;
             string sArgHelper = "<#userid|name|#steamid> [<time>] [<reason>]";
             if (command.ArgCount < iArgNeed)
             {
                 UI.ReplyToCommand(client, "EntWatch.Info.Error.MinArg", command.ChatTrigger, iArgNeed, command.CommandName, sArgHelper);
-                return ECommandAction.Stopped;
+                return;
             }
 
             var players = TargetManager.Find(client, command.GetArg(1));
@@ -101,22 +142,22 @@ namespace MS_EntWatch
             {
                 //One Target
                 IGameClient clientOnline = players.Single();
-                if (EW.GetPlayerImmunity(client) < EW.GetPlayerImmunity(clientOnline))
+                if (AdminCommands_GetPlayerImmunity(client) < AdminCommands_GetPlayerImmunity(clientOnline))
                 {
                     UI.ReplyToCommand(client, "EntWatch.Reply.You_cannot_target", command.ChatTrigger, EW.g_Scheme.Color_disabled);
-                    return ECommandAction.Stopped;
+                    return;
                 }
 
                 if (!EW.CheckDictionary(clientOnline))
                 {
                     UI.ReplyToCommand(client, "EntWatch.Info.Error.NotFoundInDictionary", command.ChatTrigger);
-                    return ECommandAction.Stopped;
+                    return;
                 }
 
                 if (EW.g_EWPlayer[clientOnline].BannedPlayer.bBanned)
                 {
                     UI.ReplyToCommand(client, "EntWatch.Reply.Eban.Has_a_Restrict", command.ChatTrigger, UI.PlayerInfo(client, UI.PlayerInfoFormat(clientOnline)), EW.g_Scheme.Color_disabled);
-                    return ECommandAction.Stopped;
+                    return;
                 }
                 foreach (OfflineBan OfflineTest in EW.g_OfflinePlayer.ToList())
                 {
@@ -135,7 +176,7 @@ namespace MS_EntWatch
             if (target == null)
             {
                 UI.ReplyToCommand(client, "EntWatch.Reply.No_matching_client", command.ChatTrigger, EW.g_Scheme.Color_warning);
-                return ECommandAction.Stopped;
+                return;
             }
 
             int time = Cvar.BanTime;
@@ -144,21 +185,21 @@ namespace MS_EntWatch
                 if (!int.TryParse(command.GetArg(2), out int timeparse))
                 {
                     UI.ReplyToCommand(client, "EntWatch.Reply.Must_be_an_integer", command.ChatTrigger, EW.g_Scheme.Color_warning);
-                    return ECommandAction.Stopped;
+                    return;
                 }
                 time = timeparse;
             }
 
-            if (time == 0 && !EW.CheckPermission(client, "ew_ban_perm"))
+            if (time == 0 && !AdminCommands_CheckPermission(client, PermissionBanPerm))
             {
                 UI.ReplyToCommand(client, "EntWatch.Reply.Eban.Access.Permanent", command.ChatTrigger, EW.g_Scheme.Color_warning);
-                return ECommandAction.Stopped;
+                return;
             }
 
-            if (time > Cvar.BanLong && !EW.CheckPermission(client, "ew_ban_long"))
+            if (time > Cvar.BanLong && !AdminCommands_CheckPermission(client, PermissionBanLong))
             {
                 UI.ReplyToCommand(client, "EntWatch.Reply.Eban.Access.Long", command.ChatTrigger, EW.g_Scheme.Color_warning, Cvar.BanLong);
-                return ECommandAction.Stopped;
+                return;
             }
 
             string reason = command.ArgCount >= 3 ? command.GetArg(3) : "";
@@ -173,24 +214,22 @@ namespace MS_EntWatch
             else
             {
                 UI.ReplyToCommand(client, "EntWatch.Reply.Eban.Ban.Failed", command.ChatTrigger, EW.g_Scheme.Color_warning);
-                return ECommandAction.Stopped;
+                return;
             }
 
             UI.EWChatAdminBan(UI.PlayerInfoFormat(client), target.Online && target.Player != null ? UI.PlayerInfoFormat(target.Player) : UI.PlayerInfoFormat(target.Name, target.SteamID), reason, true);
-
-            return ECommandAction.Stopped;
         }
 
-        private ECommandAction OnEWUnBan(IGameClient client, StringCommand command)
+        private void OnEWUnBan(IGameClient? client, StringCommand command)
         {
-            if (!client.IsValid || EW.g_Scheme == null) return ECommandAction.Stopped;
+            if (client == null || !client.IsValid || EW.g_Scheme == null) return;
 
             int iArgNeed = 1;
             string sArgHelper = "<#userid|name|#steamid> [<reason>]";
             if (command.ArgCount < iArgNeed)
             {
                 UI.ReplyToCommand(client, "EntWatch.Info.Error.MinArg", command.ChatTrigger, iArgNeed, command.CommandName, sArgHelper);
-                return ECommandAction.Stopped;
+                return;
             }
 
             var players = TargetManager.Find(client, command.GetArg(1));
@@ -204,16 +243,16 @@ namespace MS_EntWatch
             {
                 IGameClient clientOnline = players.Single();
 
-                if (EW.GetPlayerImmunity(client) < EW.GetPlayerImmunity(clientOnline))
+                if (AdminCommands_GetPlayerImmunity(client) < AdminCommands_GetPlayerImmunity(clientOnline))
                 {
                     UI.ReplyToCommand(client, "EntWatch.Reply.You_cannot_target", command.ChatTrigger, EW.g_Scheme.Color_disabled);
-                    return ECommandAction.Stopped;
+                    return;
                 }
 
                 if (!EW.CheckDictionary(clientOnline))
                 {
                     UI.ReplyToCommand(client, "EntWatch.Info.Error.NotFoundInDictionary", command.ChatTrigger);
-                    return ECommandAction.Stopped;
+                    return;
                 }
 
                 target.bBanned = EW.g_EWPlayer[clientOnline].BannedPlayer.bBanned;
@@ -227,7 +266,7 @@ namespace MS_EntWatch
                 if (string.IsNullOrEmpty(sSteamID))
                 {
                     UI.ReplyToCommand(client, "EntWatch.Reply.InvalidSteamID", command.ChatTrigger, EW.g_Scheme.Color_disabled, EW.g_Scheme.Color_name, UI.ReplaceSpecial(clientOnline.Name));
-                    return ECommandAction.Stopped;
+                    return;
                 }
                 target.sClientSteamID = sSteamID;
             }
@@ -241,8 +280,6 @@ namespace MS_EntWatch
                 EbanPlayer.GetBan(sTarget[1..], client, reason, command.ChatTrigger, GetBanComm_Handler);
             }
             else UI.ReplyToCommand(client, "EntWatch.Reply.No_matching_client", command.ChatTrigger, EW.g_Scheme.Color_warning);
-
-            return ECommandAction.Stopped;
         }
 
         readonly GetBanCommFunc GetBanComm_Handler = (sClientSteamID, client, reason, bChat, DBQuery_Result) =>
@@ -281,14 +318,14 @@ namespace MS_EntWatch
                 return;
             }
             
-            if (target.iDuration == 0 && !EW.CheckPermission(client, "ew_unban_perm"))
+            if (target.iDuration == 0 && !AdminCommands_CheckPermission(client, PermissionUnbanPerm))
             {
                 UI.ReplyToCommand(client, "EntWatch.Reply.Eban.Access.UnPermanent", bChat, EW.g_Scheme.Color_warning);
                 return;
             }
 
             string? sSteamID = EW.ConvertSteamID64ToSteamID(client.SteamId.ToString());
-            if (!string.Equals(target.sAdminSteamID, !string.IsNullOrEmpty(sSteamID) ? sSteamID : "SERVER") && EW.CheckPermission(client, "ew_unban_other"))
+            if (!string.Equals(target.sAdminSteamID, !string.IsNullOrEmpty(sSteamID) ? sSteamID : "SERVER") && AdminCommands_CheckPermission(client, PermissionUnbanOther))
             {
                 UI.ReplyToCommand(client, "EntWatch.Reply.Eban.Access.Other", bChat, EW.g_Scheme.Color_warning);
                 return;
@@ -308,9 +345,9 @@ namespace MS_EntWatch
             UI.EWChatAdminBan(UI.PlayerInfoFormat(client), UI.PlayerInfoFormat(target.sClientName, target.sClientSteamID), reason, false);
         }
 
-        private ECommandAction OnEWBanList(IGameClient client, StringCommand command)
+        private void OnEWBanList(IGameClient? client, StringCommand command)
         {
-            if (!client.IsValid || EW.g_Scheme == null) return ECommandAction.Stopped;
+            if (client == null || !client.IsValid || EW.g_Scheme == null) return;
 
             UI.ReplyToCommand(client, "EntWatch.Reply.Eban.List", command.ChatTrigger, EW.g_Scheme.Color_warning);
 
@@ -334,13 +371,11 @@ namespace MS_EntWatch
                 }
             }
             if (iCount == 0) UI.ReplyToCommand(client, "EntWatch.Reply.Eban.NoPlayers", command.ChatTrigger, EW.g_Scheme.Color_warning);
-
-            return ECommandAction.Stopped;
         }
 
-        private ECommandAction OnEWList(IGameClient client, StringCommand command)
+        private void OnEWList(IGameClient? client, StringCommand command)
         {
-            if (!client.IsValid || EW.g_Scheme == null) return ECommandAction.Stopped;
+            if (client == null || !client.IsValid || EW.g_Scheme == null) return;
 
             UI.ReplyToCommand(client, "EntWatch.Reply.Offline.Info", command.ChatTrigger, EW.g_Scheme.Color_warning);
 
@@ -358,20 +393,18 @@ namespace MS_EntWatch
                     UI.ReplyToCommand(client, "EntWatch.Reply.Offline.Leave", command.ChatTrigger, EW.g_Scheme.Color_warning, iCount, OfflineTest.Name, OfflineTest.UserID, OfflineTest.SteamID, !string.IsNullOrEmpty(OfflineTest.LastItem) ? OfflineTest.LastItem : "-", (int)((CurrentTime - OfflineTest.TimeStamp_Start) / 60));
                 }
             }
-
-            return ECommandAction.Stopped;
         }
 
-        private ECommandAction OnEWTransfer(IGameClient client, StringCommand command)
+        private void OnEWTransfer(IGameClient? client, StringCommand command)
         {
-            if (!client.IsValid || !EW.g_CfgLoaded || EW.g_Scheme == null) return ECommandAction.Stopped;
+            if (client == null || !client.IsValid || !EW.g_CfgLoaded || EW.g_Scheme == null) return;
 
             int iArgNeed = 2;
             string sArgHelper = "<owner>/$<itemname> <receiver>";
             if (command.ArgCount < iArgNeed)
             {
                 UI.ReplyToCommand(client, "EntWatch.Info.Error.MinArg", command.ChatTrigger, iArgNeed, command.CommandName, sArgHelper);
-                return ECommandAction.Stopped;
+                return;
             }
 
             string sItemName = command.GetArg(1);
@@ -392,7 +425,7 @@ namespace MS_EntWatch
                 if (item == null)
                 {
                     UI.ReplyToCommand(client, "EntWatch.Reply.Transfer.InvalidItemName", command.ChatTrigger, EW.g_Scheme.Color_warning);
-                    return ECommandAction.Stopped;
+                    return;
                 }
             } else
             {
@@ -401,10 +434,10 @@ namespace MS_EntWatch
                 if (targets.Count > 0)
                 {
                     target = targets.Single();
-                    if (EW.GetPlayerImmunity(client) < EW.GetPlayerImmunity(target))
+                    if (AdminCommands_GetPlayerImmunity(client) < AdminCommands_GetPlayerImmunity(target))
                     {
                         UI.ReplyToCommand(client, "EntWatch.Reply.You_cannot_target", command.ChatTrigger, EW.g_Scheme.Color_disabled);
-                        return ECommandAction.Stopped;
+                        return;
                     }
                 }
             }
@@ -418,18 +451,18 @@ namespace MS_EntWatch
                 if (!EW.CheckDictionary(receiver))
                 {
                     UI.ReplyToCommand(client, "EntWatch.Info.Error.NotFoundInDictionary", command.ChatTrigger);
-                    return ECommandAction.Stopped;
+                    return;
                 }
 
                 if (EW.g_EWPlayer[receiver].BannedPlayer.bBanned)
                 {
                     UI.ReplyToCommand(client, "EntWatch.Reply.Eban.Has_a_Restrict", command.ChatTrigger, UI.PlayerInfo(client, UI.PlayerInfoFormat(receiver)), EW.g_Scheme.Color_disabled);
-                    return ECommandAction.Stopped;
+                    return;
                 }
             } else
             {
                 UI.ReplyToCommand(client, "EntWatch.Reply.No_matching_client", command.ChatTrigger, EW.g_Scheme.Color_warning);
-                return ECommandAction.Stopped;
+                return;
             }
 
             if (target != null)
@@ -437,13 +470,13 @@ namespace MS_EntWatch
                 if (target == receiver)
                 {
                     UI.ReplyToCommand(client, "EntWatch.Reply.Transfer.AlreadyOwns", command.ChatTrigger, EW.g_Scheme.Color_warning);
-                    return ECommandAction.Stopped;
+                    return;
                 }
 
                 if (target.GetPlayerController() is { } targetplayer && receiver.GetPlayerController() is { } receiverplayer && targetplayer.Team != receiverplayer.Team)
                 {
                     UI.ReplyToCommand(client, "EntWatch.Reply.Transfer.Differsteam", command.ChatTrigger, EW.g_Scheme.Color_warning);
-                    return ECommandAction.Stopped;
+                    return;
                 }
             }
 
@@ -455,20 +488,18 @@ namespace MS_EntWatch
             {
                 Transfer.ItemName(client, item, receiver, command.ChatTrigger);
             }
-
-            return ECommandAction.Stopped;
         }
 
-        private ECommandAction OnEWSpawn(IGameClient client, StringCommand command)
+        private void OnEWSpawn(IGameClient? client, StringCommand command)
         {
-            if (!client.IsValid || !EW.g_CfgLoaded || EW.g_Scheme == null) return ECommandAction.Stopped;
+            if (client == null || !client.IsValid || !EW.g_CfgLoaded || EW.g_Scheme == null) return;
 
             int iArgNeed = 2;
             string sArgHelper = "<itemname> <receiver> [<strip>]";
             if (command.ArgCount < iArgNeed)
             {
                 UI.ReplyToCommand(client, "EntWatch.Info.Error.MinArg", command.ChatTrigger, iArgNeed, command.CommandName, sArgHelper);
-                return ECommandAction.Stopped;
+                return;
             }
 
             string sItemName = command.GetArg(1);
@@ -476,7 +507,7 @@ namespace MS_EntWatch
             if (string.IsNullOrEmpty(sItemName))
             {
                 UI.ReplyToCommand(client, "EntWatch.Reply.Spawn.BadItemName", command.ChatTrigger, EW.g_Scheme.Color_warning);
-                return ECommandAction.Stopped;
+                return;
             }
 
             bool bStrip = false;
@@ -492,13 +523,13 @@ namespace MS_EntWatch
                     if (!EW.CheckDictionary(receiver))
                     {
                         UI.ReplyToCommand(client, "EntWatch.Info.Error.NotFoundInDictionary", command.ChatTrigger);
-                        return ECommandAction.Stopped;
+                        return;
                     }
 
                     if (EW.g_EWPlayer[receiver].BannedPlayer.bBanned)
                     {
                         UI.ReplyToCommand(client, "EntWatch.Reply.Eban.Has_a_Restrict", command.ChatTrigger, UI.PlayerInfo(client, UI.PlayerInfoFormat(receiver)), EW.g_Scheme.Color_disabled);
-                        return ECommandAction.Stopped;
+                        return;
                     }
 
                     SpawnItem.Spawn(client, receiver, sItemName, bStrip, command.ChatTrigger, true);
@@ -511,7 +542,7 @@ namespace MS_EntWatch
                         if (EW.CheckDictionary(receiver) && !EW.g_EWPlayer[receiver].BannedPlayer.bBanned)
                         {
                             (ItemConfig?, int) objReturn = SpawnItem.Spawn(client, receiver, sItemName, bStrip, command.ChatTrigger, false);
-                            if (objReturn.Item2 == 0) return ECommandAction.Stopped;
+                            if (objReturn.Item2 == 0) return;
                             if (Item == null && objReturn.Item1 != null) Item = objReturn.Item1;
                         }
                     }
@@ -529,10 +560,7 @@ namespace MS_EntWatch
             else
             {
                 UI.ReplyToCommand(client, "EntWatch.Reply.No_matching_client", command.ChatTrigger, EW.g_Scheme.Color_warning);
-                return ECommandAction.Stopped;
             }
-
-            return ECommandAction.Stopped;
         }
     }
 }

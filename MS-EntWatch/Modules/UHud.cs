@@ -18,7 +18,7 @@ namespace MS_EntWatch.Modules
         public void ConstructString(IPlayerController HudPlayer)
         {
             List<Item> ListShow = [];
-            bool bAdminPermissions = HudPlayer.GetGameClient() is { } cl && EW.CheckPermission(cl, "ew_hud") && Cvar.AdminHud < 2;
+            bool bAdminPermissions = HudPlayer.GetGameClient() is { } cl && EntWatch.AdminCommands_CheckPermission(cl, "ew_hud") && Cvar.AdminHud < 2;
             foreach (Item ItemTest in EW.g_ItemList.ToList())
             {
                 if (ItemTest.Owner != null)

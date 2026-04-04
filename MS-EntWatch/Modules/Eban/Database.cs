@@ -2,7 +2,7 @@
 
 namespace MS_EntWatch.Modules.Eban
 {
-#pragma warning disable CS8618
+#pragma warning disable CS8618, IDE0290, IDE0060
     public abstract class Database
     {
         public IAnyBaseNext AnyDB;
@@ -53,5 +53,5 @@ namespace MS_EntWatch.Modules.Eban
             SQLite_File = "database";
         }
     }
-#pragma warning restore CS8618
+#pragma warning restore CS8618, IDE0290, IDE0060
 }

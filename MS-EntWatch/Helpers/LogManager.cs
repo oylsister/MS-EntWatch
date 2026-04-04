@@ -133,7 +133,7 @@ namespace MS_EntWatch.Helpers
             {
                 if (cfg.ItemInfo)
                 {
-                    string sMsg = ServerLocalizer.Format(CultureInfo.GetCultureInfo(cfg.Lang), sMessage, arg);
+                    string sMsg = UI.LocalizerFormat(CultureInfo.GetCultureInfo(cfg.Lang), sMessage, arg);
                     if (string.Equals(cfg.Type.ToLower(), "file") && cfg.LWritter != null) cfg.LWritter.Information(sMsg);
                     else if (string.Equals(cfg.Type.ToLower(), "discord"))
                     {
@@ -152,7 +152,7 @@ namespace MS_EntWatch.Helpers
             {
                 if (cfg.AdminInfo)
                 {
-                    string sMsg = ServerLocalizer.Format(CultureInfo.GetCultureInfo(cfg.Lang), sMessage, arg);
+                    string sMsg = UI.LocalizerFormat(CultureInfo.GetCultureInfo(cfg.Lang), sMessage, arg);
                     if (string.Equals(cfg.Type.ToLower(), "file") && cfg.LWritter != null) cfg.LWritter.Information(sMsg);
                     else if (string.Equals(cfg.Type.ToLower(), "discord"))
                     {
@@ -171,7 +171,7 @@ namespace MS_EntWatch.Helpers
             {
                 if (cfg.SystemInfo)
                 {
-                    string sMsg = ServerLocalizer.Format(CultureInfo.GetCultureInfo(cfg.Lang), sMessage, arg);
+                    string sMsg = UI.LocalizerFormat(CultureInfo.GetCultureInfo(cfg.Lang), sMessage, arg);
                     if (string.Equals(cfg.Type.ToLower(), "file") && cfg.LWritter != null) cfg.LWritter.Information(sMsg);
                     else if (string.Equals(cfg.Type.ToLower(), "discord"))
                     {
@@ -190,7 +190,7 @@ namespace MS_EntWatch.Helpers
             {
                 if (cfg.CvarInfo)
                 {
-                    string sMsg = ServerLocalizer.Format(CultureInfo.GetCultureInfo(cfg.Lang), "EntWatch.Cvar.Notify", sCvarName, sCvarValue);
+                    string sMsg = UI.LocalizerFormat(CultureInfo.GetCultureInfo(cfg.Lang), "EntWatch.Cvar.Notify", sCvarName, sCvarValue);
                     if (string.Equals(cfg.Type.ToLower(), "file") && cfg.LWritter != null) cfg.LWritter.Information(sMsg);
                     else if (string.Equals(cfg.Type.ToLower(), "discord"))
                     {

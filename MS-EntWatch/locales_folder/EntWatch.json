@@ -474,11 +474,6 @@
 		"ru-ru": "{0} {1}использовал {2}{3}{4}",
 		"zh-cn": "{0} {1}使用了 {2}{3}{4}"
 	},
-	"EntWatch.NoPermission": {
-		"en-us": "{0}You have no permission to use this command!",
-		"ru-ru": "{0}Вы не имеете доступа к данной команде!",
-		"zh-cn": "{0}您没有权限使用此命令！"
-	},
 	"EntWatch.Chat.Admin.Restricted": {
 		"en-us": "{0}Admin {1} {2}restricted {3}",
 		"ru-ru": "{0}Админ {1} {2}запретил подбор предметов игроку {3}",

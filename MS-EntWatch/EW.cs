@@ -292,26 +292,6 @@ namespace MS_EntWatch
             }
         }
 
-        public static bool CheckPermission(IGameClient client, string permission)
-        {
-            if (client is { IsValid: true, IsFakeClient: false, IsHltv: false })
-            {
-                var admin = client.IsAuthenticated ? EntWatch._clients!.FindAdmin(client.SteamId) : null;
-                if (admin is not null && admin.HasPermission(permission)) return true;
-            }
-            return false;
-        }
-
-        public static byte GetPlayerImmunity(IGameClient client)
-        {
-            if (client is { IsValid: true, IsFakeClient: false, IsHltv: false })
-            {
-                var admin = client.IsAuthenticated ? EntWatch._clients!.FindAdmin(client.SteamId) : null;
-                if (admin is not null) return admin.Immunity;
-            }
-            return 0;
-        }
-
         public static void ShowHud()
         {
             UpdateTime();

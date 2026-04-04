@@ -51,7 +51,7 @@ namespace MS_EntWatch.Modules.Eban
             string ? sSteamID = EW.ConvertSteamID64ToSteamID(UserID.SteamId.ToString());
             if (!string.IsNullOrEmpty(sSteamID)) offlineplayer.SteamID = sSteamID;
             else offlineplayer.SteamID = "null";
-            offlineplayer.Immutity = EW.GetPlayerImmunity(UserID);
+            offlineplayer.Immutity = EntWatch.AdminCommands_GetPlayerImmunity(UserID);
             return offlineplayer;
         }
         public static void PlayerConnectFull(IGameClient UserID)
@@ -81,7 +81,7 @@ namespace MS_EntWatch.Modules.Eban
 
         public static OfflineBan? FindTarget(IGameClient admin, string sTarget, bool bChat)
         {
-            uint iAdminImmunity = EW.GetPlayerImmunity(admin);
+            uint iAdminImmunity = EntWatch.AdminCommands_GetPlayerImmunity(admin);
             OfflineBan? target = null;
             if (sTarget.StartsWith("#steam_", StringComparison.OrdinalIgnoreCase))
             {

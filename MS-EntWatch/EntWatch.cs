@@ -3,8 +3,10 @@ using MS_EntWatch.Helpers;
 using MS_EntWatch.Modules.Eban;
 using MS_EntWatch_Shared;
 using MS_GameHUD_Shared;
+using Sharp.Modules.AdminManager.Shared;
 using Sharp.Modules.ClientPreferences.Shared;
 using Sharp.Modules.LocalizerManager.Shared;
+using Sharp.Modules.TargetingManager.Shared;
 using Sharp.Shared;
 using Sharp.Shared.Enums;
 using Sharp.Shared.GameEntities;
@@ -55,11 +57,14 @@ namespace MS_EntWatch
         public static string? _sharpPath;
         private IDisposable? _callback;
         private readonly IVirtualHook _virtualHook;
+        public static ITargetingManager? _targetingManager;
 #pragma warning restore CA2211
 
         private static IModSharpModuleInterface<ILocalizerManager>? _localizer;
         private IModSharpModuleInterface<IClientPreference>? _icp;
         private static IModSharpModuleInterface<IGameHUDAPI>? _igamehud;
+        private static IModSharpModuleInterface<IAdminManager>? _adminManager;
+        private static bool _AMInit = false;
 
         public bool Init()
         {
@@ -74,7 +79,6 @@ namespace MS_EntWatch
             _hooks.PlayerEquipWeapon.InstallForward(OnPlayerEquipWeapon);
             _hooks.PlayerWeaponCanUse.InstallHookPre(OnPlayerWeaponCanUse);
             _hooks.PlayerKilledPre.InstallForward(OnPlayerKilledPre);
-            RegAdminCommands();
             RegCommands();
             RegMapCommands();
             return true;
@@ -90,29 +94,38 @@ namespace MS_EntWatch
             _entities!.HookEntityOutput("func_physbox", "OnPlayerUse");
             _entities!.HookEntityInput("logic_case", "InValue");
             _modSharp!.PushTimer(OnEntityTransmit, 5.0, GameTimerFlags.Repeatable);
+            TryResolveTargetingManager();
+            TryResolveAdminManager();
         }
 
         public void OnAllModulesLoaded()
         {
             GetClientPrefs();
             GetLocalizer()?.LoadLocaleFile("EntWatch");
-            ServerLocalizer.LoadLocaleFile("EntWatch");
             LogManager.LoadConfig();
             GetGameHUD();
             EW.InitTimers();
             EbanDB.Init_DB();
+            TryResolveTargetingManager();
+            TryResolveAdminManager();
         }
 
         public void OnLibraryConnected(string name)
         {
             if (name.Equals("ClientPreferences")) GetClientPrefs();
             if (name.Equals("GameHUD")) GetGameHUD();
+            if (name.Equals("Sharp.Modules.TargetingManager", StringComparison.OrdinalIgnoreCase)) TryResolveTargetingManager();
+            if (name.Equals("Sharp.Modules.AdminManager", StringComparison.OrdinalIgnoreCase)) TryResolveAdminManager();
         }
 
         public void OnLibraryDisconnect(string name)
         {
             if (name.Equals("ClientPreferences")) _icp = null;
             if (name.Equals("GameHUD")) _igamehud = null;
+            if (name.Equals("Sharp.Modules.TargetingManager", StringComparison.OrdinalIgnoreCase))
+            {
+                _targetingManager = null;
+            }
         }
 
         private void OnCookieLoad(IGameClient client)
@@ -134,7 +147,6 @@ namespace MS_EntWatch
             _hooks.PlayerWeaponCanUse.RemoveHookPre(OnPlayerWeaponCanUse);
             _hooks.PlayerKilledPre.RemoveForward(OnPlayerKilledPre);
             UnRegMapCommands();
-            AdminCmdsManager.UnRegCommands();
             UnRegCommands();
             EW.RemoveTimers();
             _callback?.Dispose();
@@ -249,6 +261,34 @@ namespace MS_EntWatch
         {
             if (_igamehud?.Instance is null) _igamehud = _modules!.GetOptionalSharpModuleInterface<IGameHUDAPI>(IGameHUDAPI.Identity);
             return _igamehud?.Instance;
+        }
+
+        private static void TryResolveTargetingManager()
+        {
+            if (_targetingManager is not null) return;
+
+            _targetingManager = _modules!.GetOptionalSharpModuleInterface<ITargetingManager>(ITargetingManager.Identity)?.Instance;
+
+            if (_targetingManager is null)
+            {
+                UI.EWSysInfo("EntWatch.Info.Error", 15, "TargetingManager is not installed. Target selectors will be limited.");
+                return;
+            }
+        }
+
+        private void TryResolveAdminManager()
+        {
+            if (_adminManager?.Instance is not null) return;
+
+            _adminManager = _modules!.GetOptionalSharpModuleInterface<IAdminManager>(IAdminManager.Identity);
+
+            if (_adminManager?.Instance is null)
+            {
+                UI.EWSysInfo("EntWatch.Info.Error", 15, "AdminManager is not installed. Admin commands will not work.");
+                return;
+            }
+
+            AdminCommands_InitializePermissions();
         }
 
         int IGameListener.ListenerVersion => IGameListener.ApiVersion;

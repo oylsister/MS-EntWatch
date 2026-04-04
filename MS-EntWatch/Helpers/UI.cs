@@ -10,7 +10,7 @@ namespace MS_EntWatch.Helpers
         public static void EWChatActivity(string sMessage, string sColor, Item ItemTest, IGameClient client, Ability? AbilityTest = null)
         {
             string[] sPlayerInfoFormat = PlayerInfoFormat(client);
-            PrintToConsole(ReplaceColorTags(ServerLocalizer.Format(CultureInfo.GetCultureInfo(Cvar.ServerLanguage), sMessage, sPlayerInfoFormat[3], "", "", ItemTest.Name, (AbilityTest != null && !string.IsNullOrEmpty(AbilityTest.Name)) ? $" ({AbilityTest.Name})" : ""), false));
+            PrintToConsole(ReplaceColorTags(LocalizerFormat(CultureInfo.GetCultureInfo(Cvar.ServerLanguage), sMessage, sPlayerInfoFormat[3], "", "", ItemTest.Name, (AbilityTest != null && !string.IsNullOrEmpty(AbilityTest.Name)) ? $" ({AbilityTest.Name})" : ""), false));
 
             Task.Run(() =>
             {
@@ -24,7 +24,7 @@ namespace MS_EntWatch.Helpers
             {
                 if (pair.Key is { IsValid: true, IsFakeClient: false, IsHltv: false } cl && cl.GetPlayerController() is { } player)
                 {
-                    if (Cvar.TeamOnly && player.Team > CStrikeTeam.Spectator && ItemTest.Team != player.Team && (!EW.CheckPermission(cl, "ew_chat") || Cvar.AdminChat == 2 || (Cvar.AdminChat == 1 && AbilityTest != null))) continue;
+                    if (Cvar.TeamOnly && player.Team > CStrikeTeam.Spectator && ItemTest.Team != player.Team && (!EntWatch.AdminCommands_CheckPermission(cl, EntWatch.PermissionChat) || Cvar.AdminChat == 2 || (Cvar.AdminChat == 1 && AbilityTest != null))) continue;
 
                     ReplyToCommand(cl, sMessage, true, PlayerInfo(cl, sPlayerInfoFormat), sColor, ItemTest.Color, ItemTest.Name, (AbilityTest != null && !string.IsNullOrEmpty(AbilityTest.Name)) ? $" ({AbilityTest.Name})" : "");
                 }
@@ -32,7 +32,7 @@ namespace MS_EntWatch.Helpers
         }
         public static void EWSysInfo(string sMessage, int iColor = 15, params object[] arg)
         {
-            PrintToConsole(ServerLocalizer.Format(CultureInfo.GetCultureInfo(Cvar.ServerLanguage), ReplaceColorTags(sMessage, false), arg), iColor);
+            PrintToConsole(LocalizerFormat(CultureInfo.GetCultureInfo(Cvar.ServerLanguage), ReplaceColorTags(sMessage, false), arg), iColor);
 
             Task.Run(() =>
             {
@@ -42,7 +42,7 @@ namespace MS_EntWatch.Helpers
 
         public static void EWSysInfoServerInit(string sMessage, int iColor = 15, params object[] arg)
         {
-            PrintToConsole(ServerLocalizer.Format(CultureInfo.GetCultureInfo(Cvar.ServerLanguage), ReplaceColorTags(sMessage, false), arg), iColor);
+            PrintToConsole(LocalizerFormat(CultureInfo.GetCultureInfo(Cvar.ServerLanguage), ReplaceColorTags(sMessage, false), arg), iColor);
 
             Task.Run(() =>
             {
@@ -52,7 +52,7 @@ namespace MS_EntWatch.Helpers
 
         public static void EWAdminInfo(string sMessage, params object[] arg)
         {
-            PrintToConsole(ServerLocalizer.Format(CultureInfo.GetCultureInfo(Cvar.ServerLanguage), ReplaceColorTags(sMessage, false), arg), 2);
+            PrintToConsole(LocalizerFormat(CultureInfo.GetCultureInfo(Cvar.ServerLanguage), ReplaceColorTags(sMessage, false), arg), 2);
 
             Task.Run(() =>
             {
@@ -96,7 +96,7 @@ namespace MS_EntWatch.Helpers
 
         public static void CvarChangeNotify(string sCvarName, string sCvarValue, bool bClientNotify)
         {
-            PrintToConsole(ServerLocalizer.Format(CultureInfo.GetCultureInfo(Cvar.ServerLanguage), "EntWatch.Cvar.Notify", [ sCvarName, sCvarValue ]), 3);
+            PrintToConsole(LocalizerFormat(CultureInfo.GetCultureInfo(Cvar.ServerLanguage), "EntWatch.Cvar.Notify", [ sCvarName, sCvarValue ]), 3);
 
             Task.Run(() =>
             {
@@ -119,9 +119,15 @@ namespace MS_EntWatch.Helpers
         {
             if (client is { IsValid: true, IsFakeClient: false, IsHltv: false } && client.GetPlayerController() is { } player && EntWatch.GetLocalizer() is { } lm)
             {
-                var localizer = lm.GetLocalizer(client);
-                player.Print(bChat ? HudPrintChannel.Chat : HudPrintChannel.Console, ReplaceColorTags($"{Tag()}{localizer.Format(sMessage, arg)}", bChat));
+                var localizer = lm.For(client);
+                player.Print(bChat ? HudPrintChannel.Chat : HudPrintChannel.Console, ReplaceColorTags($"{Tag()}{localizer.Text(sMessage, arg)}", bChat));
             }
+        }
+
+        public static string LocalizerFormat(CultureInfo culture, string key, params ReadOnlySpan<object?> param)
+        {
+            if (EntWatch.GetLocalizer() is { } lm) return lm.Format(culture, key, param);
+            return "";
         }
 
         public static string PlayerInfo(IGameClient? client, string[] sPlayerInfoFormat)

@@ -31,11 +31,13 @@ Notify players about entity interactions
 1. [ModSharp](https://github.com/Kxnrl/modsharp-public)
 2. [ClientPreferences](https://github.com/Kxnrl/modsharp-public/tree/master/Sharp.Modules/ClientPreferences)
 3. [LocalizerManager](https://github.com/Kxnrl/modsharp-public/tree/master/Sharp.Modules/LocalizerManager)
-4. [AnyBaseLibNext](https://github.com/darkerz7/MS-AnyBaseLibNext-Shared)
-5. [GameHUD](https://github.com/darkerz7/MS-GameHUD)
+4. [AdminManager](https://github.com/Kxnrl/modsharp-public/tree/master/Sharp.Modules/AdminManager)
+5. [TargetingManager](https://github.com/Kxnrl/modsharp-public/tree/master/Sharp.Modules/TargetingManager)
+6. [AnyBaseLibNext](https://github.com/darkerz7/MS-AnyBaseLibNext-Shared)
+7. [GameHUD](https://github.com/darkerz7/MS-GameHUD)
 
 ## Installation:
-1. Install `ClientPreferences`, `LocalizerManager`, `MS-AnyBaseLibNext-Shared` and `MS-GameHUD`
+1. Install `ClientPreferences`, `LocalizerManager`, `AdminManager`, `TargetingManager`, `MS-AnyBaseLibNext-Shared` and `MS-GameHUD`
 2. Compile or copy MS-EntWatch to `sharp/modules/MS-EntWatch` folger
 3. Copy and configure the configuration file `db_config.json` and `log_config.json` to `sharp/modules/MS-EntWatch` folger
 4. Copy `EntWatch.json` to `sharp/locales` folger
@@ -107,17 +109,17 @@ Notify players about entity interactions
 ## Admin privileges
 Privilege | Description
 --- | ---
-`ew_reload` | Allows you to reload the plugin settings and view them
-`ew_chat` | Allows you to view messages about item selection in team mode
-`ew_hud` | Allows you to display items in command mode
-`ew_ban` | Allows access to bans (Command)
-`ew_ban_perm` | Allows access to permanent bans (Duration 0)
-`ew_ban_long` | Allows access to long bans (Cvar ewc_banlong)
-`ew_unban` | Allows access to unbans (Command)
-`ew_unban_perm` | Allows access to permanent unbans (Duration 0)
-`ew_unban_other` | Allows access to unbans from other admins
-`ew_transfer` | Allows transfer of items
-`ew_spawn` | Allows items to spawn
+`entwatch:reload` | Allows you to reload the plugin settings and view them
+`entwatch:chat` | Allows you to view messages about item selection in team mode
+`entwatch:hud` | Allows you to display items in command mode
+`entwatch:ban` | Allows access to bans (Command)
+`entwatch:banperm` | Allows access to permanent bans (Duration 0)
+`entwatch:banlong` | Allows access to long bans (Cvar ewc_banlong)
+`entwatch:unban` | Allows access to unbans (Command)
+`entwatch:unbanperm` | Allows access to permanent unbans (Duration 0)
+`entwatch:unbanother` | Allows access to unbans from other admins
+`entwatch:transfer` | Allows transfer of items
+`entwatch:spawn` | Allows items to spawn
 
 ## CVARs
 Cvar | Parameters | Description
