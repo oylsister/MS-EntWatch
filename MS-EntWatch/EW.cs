@@ -181,6 +181,9 @@ namespace MS_EntWatch
                     {
                         Item cNewItem = new(ItemTest, weapon);
                         g_ItemList.Add(cNewItem);
+                        //Auto block after adding to the list
+                        if (cNewItem.BlockPickup || Cvar.GlobalBlock) cNewItem.WeaponHandle.CanBePickedUp = false;
+                        else cNewItem.WeaponHandle.CanBePickedUp = true;
                         return true;
                     }
                 }

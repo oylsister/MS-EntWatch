@@ -5,7 +5,7 @@
     <RootNamespace>MS_EntWatch</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>1.0.7</Version>
+    <Version>1.0.8</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	<EntWatch_Shared_Version>1.0.0</EntWatch_Shared_Version>
   </PropertyGroup>
