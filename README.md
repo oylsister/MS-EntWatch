@@ -28,7 +28,7 @@ Notify players about entity interactions
 24. Allows you to select the player display format
 
 ## Required packages:
-1. [ModSharp](https://github.com/Kxnrl/modsharp-public)
+1. [ModSharp](https://github.com/Kxnrl/modsharp-public) (min. git132)
 2. [ClientPreferences](https://github.com/Kxnrl/modsharp-public/tree/master/Sharp.Modules/ClientPreferences)
 3. [LocalizerManager](https://github.com/Kxnrl/modsharp-public/tree/master/Sharp.Modules/LocalizerManager)
 4. [AdminManager](https://github.com/Kxnrl/modsharp-public/tree/master/Sharp.Modules/AdminManager)

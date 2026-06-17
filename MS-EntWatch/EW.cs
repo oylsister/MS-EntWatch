@@ -285,16 +285,6 @@ namespace MS_EntWatch
             }, 2.0f, GameTimerFlags.StopOnRoundEnd);
         }
 
-        public static IEnumerable<IBaseEntity> GetEntitiesByClassname(string classname, Func<IBaseEntity, bool>? predicate = null)
-        {
-            IBaseEntity? entity = null;
-            while ((entity = EntWatch._entities!.FindEntityByClassname(entity, classname)) != null)
-            {
-                if (predicate is not null && !predicate(entity)) continue;
-                yield return entity;
-            }
-        }
-
         public static void ShowHud()
         {
             UpdateTime();

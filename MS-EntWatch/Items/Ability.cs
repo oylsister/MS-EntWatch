@@ -128,8 +128,7 @@ namespace MS_EntWatch.Items
         {
             if ((Mode == 6 || Mode == 7) && MathFindSpawned && !string.IsNullOrEmpty(MathID) && !string.Equals(MathID, "0"))
             {
-                var entMaths = EW.GetEntitiesByClassname("math_counter");
-                foreach (var entMath in entMaths)
+                foreach (var entMath in EntWatch._entities!.GetAllEntitiesByClassname("math_counter"))
                 {
                     if (entMath != null && entMath.IsValid() && string.Equals(entMath.HammerId, MathID))
                     {

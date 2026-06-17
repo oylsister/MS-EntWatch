@@ -51,7 +51,7 @@ namespace MS_EntWatch.Modules
             }
 
             IBaseEntity? entPT = null;
-            foreach (var entity in EW.GetEntitiesByClassname("point_template").ToList())
+            foreach (var entity in EntWatch._entities!.GetAllEntitiesByClassname("point_template"))
             {
                 if (entity is { IsValidEntity:true } && string.Equals(entity.HammerId, Item.SpawnerID))
                 {
