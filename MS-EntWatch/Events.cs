@@ -466,7 +466,6 @@ namespace MS_EntWatch
         {
             if (_entities!.MakeEntityFromPointer<IBaseEntity>(@ent) is not { IsValidEntity: true } entity) return false;
             if (_entities!.MakeEntityFromPointer<IBaseEntity>(@act) is not { IsValidEntity: true } activator) return false;
-
             if (EW.g_ItemConfig != null && activator.AsPlayerPawn() is { } pawn && pawn.GetController() is { } player && player.GetGameClient() is { } client && EW.CheckDictionary(client) && EW.g_EWPlayer[client].BannedPlayer.bBanTrigger)
             {
                 foreach (ItemConfig ItemTest in EW.g_ItemConfig.ToList())
@@ -474,6 +473,7 @@ namespace MS_EntWatch
                     if (!string.IsNullOrEmpty(ItemTest.TriggerID) && !string.Equals(ItemTest.TriggerID, "0") && string.Equals(ItemTest.TriggerID, entity.HammerId)) return false;
                 }
             }
+
             return CBaseTrigger_PassesTriggerFilters(@ent, @act);
         }
 
@@ -490,13 +490,11 @@ namespace MS_EntWatch
                     {
                         if (ItemTest.Owner is { IsValid:true } owner && owner.GetPlayerController() is { } player && player.GetPawn() is { } pawn && pawn.Index == activator.Index && ItemTest.CheckDelay() && AbilityTest.Ready())
                         {
-                            AbilityTest.SetFilter(activator);
+                            //AbilityTest.SetFilter(activator);
                             AbilityTest.Used();
                             if (EW.g_Scheme != null) UI.EWChatActivity("EntWatch.Chat.Use", EW.g_Scheme.Color_use, ItemTest, ItemTest.Owner, AbilityTest);
                             EW.g_cAPI.OnUseItem(ItemTest.Name, ItemTest.Owner, AbilityTest.Name);
-                            return default;
                         }
-                        else return EHookAction.SkipCallReturnOverride;
                     }
                 }
             }
@@ -520,11 +518,10 @@ namespace MS_EntWatch
                             {
                                 if (ItemTest.Owner is { IsValid: true } owner && owner.GetPlayerController() is { } player && player.GetPawn() is { } pawn && pawn.Index == activator.Index && ItemTest.CheckDelay() && AbilityTest.Ready())
                                 {
-                                    AbilityTest.SetFilter(activator);
+                                    // AbilityTest.SetFilter(activator);
                                     AbilityTest.Used();
                                     if (EW.g_Scheme != null) UI.EWChatActivity("EntWatch.Chat.Use", EW.g_Scheme.Color_use, ItemTest, ItemTest.Owner, AbilityTest);
                                     EW.g_cAPI.OnUseItem(ItemTest.Name, ItemTest.Owner, AbilityTest.Name);
-                                    return default;
                                 }
                             }
                         }

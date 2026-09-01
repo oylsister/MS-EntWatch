@@ -42,6 +42,7 @@ namespace MS_EntWatch
             _dllPath = dllPath;
             _sharpPath = sharpPath;
             _virtualHook = _hooks.CreateVirtualHook();
+            _panorama = sharedSystem.GetPanoramaManager();
         }
 #pragma warning disable CA2211
         public static IModSharp? _modSharp;
@@ -58,6 +59,7 @@ namespace MS_EntWatch
         private IDisposable? _callback;
         private readonly IVirtualHook _virtualHook;
         public static ITargetingManager? _targetingManager;
+        public static IPanoramaManager _panorama;
 #pragma warning restore CA2211
 
         private static IModSharpModuleInterface<ILocalizerManager>? _localizer;

@@ -21,11 +21,16 @@ namespace MS_EntWatch
             PFormatPlayer = Cvar.PlayerFormat;
         }
 
-        public static void RemoveEntityHud(IPlayerController player)
+        public void RemoveEntityHud(IPlayerController player)
         {
             if (EntWatch.GetGameHUD() is { } _api && player.IsValid())
             {
                 _api.Native_GameHUD_Remove(player, EW.HUDCHANNEL);
+            }
+
+            if(HudPlayer is PanoramaHud phud)
+            {
+                phud.RemoveHud();
             }
         }
 
@@ -41,6 +46,7 @@ namespace MS_EntWatch
                 1 => new HudCenter(),
                 2 => new HudAlert(),
                 3 => new HudWorldText(),
+                4 => new PanoramaHud(),
                 _ => new HudNull(),
             };
             HudPlayer.vecEntity = LastCfg.vecEntity;
@@ -49,6 +55,7 @@ namespace MS_EntWatch
             HudPlayer.iRefresh = LastCfg.iRefresh;
             HudPlayer.iSize = LastCfg.iSize;
             if (HudPlayer is HudWorldText hud) hud.InitHud(player);
+            if (HudPlayer is PanoramaHud phud) phud.InitHud(player);
         }
     }
 }
