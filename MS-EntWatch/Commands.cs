@@ -71,7 +71,7 @@ namespace MS_EntWatch
                         case 1: { UI.ReplyToCommand(client, "EntWatch.Reply.Hud.Center", command.ChatTrigger, EW.g_Scheme != null ? EW.g_Scheme.Color_warning : "", EW.g_Scheme != null ? EW.g_Scheme.Color_enabled : ""); return ECommandAction.Stopped; }
                         case 2: { UI.ReplyToCommand(client, "EntWatch.Reply.Hud.Alert", command.ChatTrigger, EW.g_Scheme != null ? EW.g_Scheme.Color_warning : "", EW.g_Scheme != null ? EW.g_Scheme.Color_enabled : ""); return ECommandAction.Stopped; }
                         case 3: { UI.ReplyToCommand(client, "EntWatch.Reply.Hud.WorldText", command.ChatTrigger, EW.g_Scheme != null ? EW.g_Scheme.Color_warning : "", EW.g_Scheme != null ? EW.g_Scheme.Color_enabled : ""); return ECommandAction.Stopped; }
-                        case 4: { UI.ReplyToCommand(client, "EntWatch.Reply.Hud.WorldText", command.ChatTrigger, EW.g_Scheme != null ? EW.g_Scheme.Color_warning : "", EW.g_Scheme != null ? EW.g_Scheme.Color_enabled : ""); return ECommandAction.Stopped;  };
+                        case 4: { UI.ReplyToCommand(client, "EntWatch.Reply.Hud.Panorama", command.ChatTrigger, EW.g_Scheme != null ? EW.g_Scheme.Color_warning : "", EW.g_Scheme != null ? EW.g_Scheme.Color_enabled : ""); return ECommandAction.Stopped; }
                         default: { UI.ReplyToCommand(client, "EntWatch.Reply.Hud.Using_number", command.ChatTrigger, EW.g_Scheme != null ? EW.g_Scheme.Color_warning : ""); return ECommandAction.Stopped; }
                     }
                 }
