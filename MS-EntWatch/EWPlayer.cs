@@ -28,10 +28,7 @@ namespace MS_EntWatch
                 _api.Native_GameHUD_Remove(player, EW.HUDCHANNEL);
             }
 
-            if(HudPlayer is PanoramaHud phud)
-            {
-                phud.RemoveHud();
-            }
+            PanoramaService.KillHud(player);
         }
 
         public void SwitchHud(IPlayerController player, int number)
@@ -55,7 +52,6 @@ namespace MS_EntWatch
             HudPlayer.iRefresh = LastCfg.iRefresh;
             HudPlayer.iSize = LastCfg.iSize;
             if (HudPlayer is HudWorldText hud) hud.InitHud(player);
-            if (HudPlayer is PanoramaHud phud) phud.InitHud(player);
         }
     }
 }

@@ -50,6 +50,7 @@ namespace MS_EntWatch
         private static void OnEventRoundStart()
         {
             EW.g_ItemList.Clear();
+            PanoramaService.KillAllHud();
             foreach (var client in _clients!.GetGameClients(true).ToArray())
             {
                 if (client.GetPlayerController() is { } player) ClanTag.RemoveClanTag(player);
@@ -65,6 +66,7 @@ namespace MS_EntWatch
         {
             EW.g_ItemList.Clear();
             //Remove items after the end of the round
+            PanoramaService.KillAllHud();
             if (Cvar.RemoveItemAfterRoundEnd)
             {
                 foreach (var player in _entities!.FindPlayerControllers(true).ToList())
@@ -237,8 +239,8 @@ namespace MS_EntWatch
                 }
                 else
                 {
-                    cp.SetCookie(client.SteamId, "EW_HUD_Type", "3");
-                    EW.g_EWPlayer[client].SwitchHud(player, 3);
+                    cp.SetCookie(client.SteamId, "EW_HUD_Type", "4");
+                    EW.g_EWPlayer[client].SwitchHud(player, 4);
                 }
                 //Refresh
                 if (cp.GetCookie(client.SteamId, "EW_HUD_Refresh") is { } cookie_hud_refresh)
@@ -306,6 +308,11 @@ namespace MS_EntWatch
         private static void OnEventPlayerDisconnect(IGameClient client)
         {
             OfflineFunc.PlayerDisconnect(client);
+
+            var controller = client.GetPlayerController();
+
+            if (controller != null)
+                PanoramaService.RemovePlayerHud(controller);
 
             EW.g_EWPlayer.Remove(client);   //Remove EWPlayer
 

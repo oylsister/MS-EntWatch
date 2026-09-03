@@ -161,48 +161,11 @@ namespace MS_EntWatch.Modules
 
     class PanoramaHud : UHud
     {
-        public ICustomHudLayout? iHudLayout;
-
         public PanoramaHud() { }
 
         public override void UpdateText(string sItems, IPlayerController HudPlayer)
         {
-            if (iHudLayout == null || !iHudLayout.IsValid()) InitHud(HudPlayer);
-
-            if (string.IsNullOrEmpty(sItems))
-            {
-                iHudLayout?.SetClassOverrideForPlayer(HudPlayer, "entwatch", "Disabled", HudPanelClassStatus.ForceEnable);
-            }
-
-            else if (HudPlayer.IsValid() && !HudPlayer.IsFakeClient && !string.IsNullOrEmpty(sItems))
-            {
-                //HudPlayer.Print(HudPrintChannel.Chat, "Update HUD");
-                iHudLayout?.SetDialogVariableStringForPlayer(HudPlayer, "entwatch", "item-list", sItems);
-                iHudLayout?.SetClassOverrideForPlayer(HudPlayer, "entwatch", "Disabled", HudPanelClassStatus.ForceDisable);
-            }
-        }
-
-        public void InitHud(IPlayerController HudPlayer)
-        {
-            var path = "panorama/layout/custom_game/entwatch_ed.vxml_c";
-            iHudLayout = EntWatch._panorama.CreateLayout(path);
-
-            //HudPlayer.Print(HudPrintChannel.Chat, "Created Hud");
-
-            if (iHudLayout != null && iHudLayout.IsValid())
-            {
-                iHudLayout.SetClassOverrideForPlayer(HudPlayer, "entwatch", "Disabled", HudPanelClassStatus.ForceDisable);
-                //HudPlayer.Print(HudPrintChannel.Chat, "Set entwatch opacity 0 Disabled");
-            }
-        }
-
-        public void RemoveHud()
-        {
-            if (iHudLayout != null && iHudLayout.IsValid())
-            {
-                iHudLayout.Kill();
-                iHudLayout = null;
-            }
+            PanoramaService.UpdateText(HudPlayer, sItems);
         }
     }
 }
